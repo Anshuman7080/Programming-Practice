@@ -1,75 +1,69 @@
-/* C++ implementation of QuickSort */
-#include <bits/stdc++.h>
+#include <iostream>
+#include <algorithm> // for std::swap
+#include <vector>   // for std::vector
+
 using namespace std;
 
-// A utility function to swap two elements
-void swap(int* a, int* b)
-{
-	int t = *a;
-	*a = *b;
-	*b = t;
+// Function to choose a pivot using the median-of-three method
+int medianOfThree(int arr[], int low, int mid, int high) {
+    if (arr[low] > arr[mid])
+        swap(arr[low], arr[mid]);
+    if (arr[low] > arr[high])
+        swap(arr[low], arr[high]);
+    if (arr[mid] > arr[high])
+        swap(arr[mid], arr[high]);
+    // Place the pivot at the end
+    swap(arr[mid], arr[high - 1]);
+    return arr[high - 1]; // Return the pivot value
 }
 
-/* This function takes last element as pivot, places
-the pivot element at its correct position in sorted
-array, and places all smaller (smaller than pivot)
-to left of pivot and all greater elements to right
-of pivot */
-int partition(int arr[], int low, int high)
-{
-	int pivot = arr[high]; // pivot
-	int i
-		= (low
-		- 1); // Index of smaller element and indicates
-				// the right position of pivot found so far
+// A utility function to partition the array
+int partition(int arr[], int low, int high) {
+    int pivot = arr[high - 1]; // Pivot is the element just before the high index
+    int i = low; // Index of smaller element
 
-	for (int j = low; j <= high - 1; j++) {
-		// If current element is smaller than the pivot
-		if (arr[j] < pivot) {
-			i++; // increment index of smaller element
-			swap(&arr[i], &arr[j]);
-		}
-	}
-	swap(&arr[i + 1], &arr[high]);
-	return (i + 1);
+    for (int j = low; j < high - 1; j++) {
+        if (arr[j] < pivot) {
+            swap(arr[i], arr[j]);
+            i++;
+        }
+    }
+    swap(arr[i], arr[high - 1]); // Move pivot to its final place
+    return i; // Return the pivot index
 }
 
-/* The main function that implements QuickSort
-arr[] --> Array to be sorted,
-low --> Starting index,
-high --> Ending index */
-void quickSort(int arr[], int low, int high)
-{
-	if (low < high) {
-		/* pi is partitioning index, arr[p] is now
-		at right place */
-		int pi = partition(arr, low, high);
+// The main function that implements QuickSort
+void quickSort(int arr[], int low, int high) {
+    while (low < high) {
+        // Calculate the middle index for median-of-three
+        int mid = low + (high - low) / 2;
+        int pivot = medianOfThree(arr, low, mid, high - 1);
+        int pi = partition(arr, low, high);
 
-		// Separately sort elements before
-		// partition and after partition
-		quickSort(arr, low, pi - 1);
-		quickSort(arr, pi + 1, high);
-	}
+        // Tail recursion optimization: Sort the smaller partition first
+        if (pi - low < high - pi) {
+            quickSort(arr, low, pi);
+            low = pi + 1; // Iterative call for the right partition
+        } else {
+            quickSort(arr, pi + 1, high);
+            high = pi; // Iterative call for the left partition
+        }
+    }
 }
 
-/* Function to print an array */
-void printArray(int arr[], int size)
-{
-	int i;
-	for (i = 0; i < size; i++)
-		cout << arr[i] << " ";
-	cout << endl;
+// Function to print an array
+void printArray(const int arr[], int size) {
+    for (int i = 0; i < size; i++)
+        cout << arr[i] << " ";
+    cout << endl;
 }
 
-// Driver Code
-int main()
-{
-	int arr[] = { 10, 7, 8, 9, 1, 5 };
-	int n = sizeof(arr) / sizeof(arr[0]);
-	quickSort(arr, 0, n - 1);
-	cout << "Sorted array: \n";
-	printArray(arr, n);
-	return 0;
+// Driver code
+int main() {
+    int arr[] = {10, 7, 8, 9, 1, 5};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    quickSort(arr, 0, n);
+    cout << "Sorted array: \n";
+    printArray(arr, n);
+    return 0;
 }
-
-// This code is contributed by rathbhupendra
